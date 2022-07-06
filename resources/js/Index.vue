@@ -12,7 +12,7 @@
           </form>
       </nav>
 
-      <div class="container my-3">
+      <div class="container my-4">
           <router-view></router-view>
       </div>
   </div>
@@ -27,9 +27,6 @@ export default {
             lastSearchComputed: state => state.lastSearch,
             isLoggedIn: state => state.isLoggedIn,
         }),
-        ... mapGetters({
-            itemsInBasket: 'itemsInBasket',
-        })
     },
     methods: {
         
