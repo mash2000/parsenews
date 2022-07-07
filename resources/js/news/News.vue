@@ -3,6 +3,9 @@
         <div v-if="loading">
             ...Загрузка
         </div>
+        <div v-else-if="news.length === 0">
+            Нет новостей :(
+        </div>
         <div v-else>
             <div class="row articles">
                 <div 
@@ -11,7 +14,7 @@
                     :key="index"
                 >
                     <div class="card mb-4 box-shadow" :data-id="article.id">
-                        <img class="card-img-top" :alt="'Новость №' + article.id + ': ' + article.title" :src="article.image">
+                        <img class="card-img-top img-fluid" :alt="'Новость №' + article.id + ': ' + article.title" :src="article.image">
                         <div class="card-body">
                             <star-rating                         
                                 :rating="article.rating"
@@ -29,11 +32,18 @@
 
                             <h2 class="card-title">{{ article.title }}</h2>
                             <p class="card-text">{{ article.description }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                            <div class="btn-group">
-                                <button type="button" class="btn btn-sm btn-outline-info">Подробнее</button>
-                            </div>
-                            <small class="text-muted">{{ article.date }}</small>
+                            <div class="row justify-content-between align-items-center">
+                                <div class="col-lg-6">
+                                    <div class="btn-group">
+                                        <button type="button" class="btn btn-sm btn-outline-primary">Подробнее</button>
+                                        <button @click="showModal(article)" type="button" class="btn btn-sm btn-outline-danger" title="Удалить новость">
+                                            <i class="fa fa-eraser" aria-hidden="true"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <small class="text-muted">{{ setFormatDate(article.date) }}</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -44,12 +54,15 @@
                </div>
             </div> 
         </div>
+
+        <v-dialog />
     </div>
 </template>
 
 <script>
 
 import InfiniteLoading from 'vue-infinite-loading';
+import moment from 'moment';
 
 export default {
     name: 'news',
@@ -72,6 +85,7 @@ export default {
             
             if (JSON.stringify(news.data) == '[]'){
                 this.spiner = false;
+                this.loading = false;
             }
             else {
                 this.news.push(...news.data);
@@ -86,6 +100,58 @@ export default {
         },
         setRating(rating){
             this.rating = rating;
+        },
+        setFormatDate(date){
+            if (date){
+                if (date) {
+                    return moment(String(date)).format('MM.DD.YYYY, hh:mm')
+                }
+            }
+        },
+        showModal(article){
+            this.article = article;
+
+            this.$modal.show('dialog', {
+                title: `Удалить новость ${article.id}`,
+                text: `Вы действительно хотите удалить новость №${article.id}?`,
+                buttons: [
+                    {
+                        title: 'Отмена',
+                            handler: () => {
+                                this.$modal.hide('dialog')
+                            }
+                    },
+                    {
+                        title: 'Удалить',
+                        handler: () => {
+                            axios
+                                .post(`/api/deleteArticle/${article.id}`)
+                                .then((response) => {
+                                    if (response.status == 200){
+                                        const newBlock = document.querySelector(`.articles [data-id="${article.id}"]`);
+                                        if (newBlock){
+                                            newBlock.parentNode.remove();
+                                            this.$notify({
+                                                type: 'success',
+                                                title: 'Новость удалена',
+                                            });
+                                        }
+                                    }
+                                })
+                                .catch(error => {
+                                    this.$notify({
+                                        type: 'error',
+                                        title: 'Произошла ошибка',
+                                        text: error
+                                    });
+                                })
+                                .finally(() => {
+                                    this.$modal.hide('dialog')
+                                })
+                        }
+                    },
+                ]
+            })
         },
         async editArticle(article){
             this.article = article;

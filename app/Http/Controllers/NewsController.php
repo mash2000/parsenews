@@ -19,4 +19,12 @@ class NewsController extends Controller
 
         return $rating;
     }
+
+    public function deleteArticle($id)
+    {
+        $article = News::findOrFail($id);
+        $article->delete();
+
+        return $id;
+    }
 }
