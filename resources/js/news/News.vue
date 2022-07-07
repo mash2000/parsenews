@@ -4,33 +4,38 @@
             ...Загрузка
         </div>
         <div v-else>
-            <div class="row">
-                <div class="col-md-4 col-sm-6 col-12" v-for="(article, index) in news" :key="index">
-                    <div class="card mb-4 box-shadow">
-                    <img class="card-img-top" data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail" alt="Thumbnail [100%x225]" style="height: 225px; width: 100%; display: block;" :src="article.image" data-holder-rendered="true">
-                    <div class="card-body">
-                        <star-rating                         
-                            v-model="article.rating"
-                            :star-size="18"
-                            :increment="1"
-                            :animate="true"
-                            :max-rating="10"
-                            inactive-color="#808080"
-                            active-color="#FFC500"
-                            text-class="d-none"
-                            @rating-selected="editArticle(article)"
-                        >
-                        </star-rating>
+            <div class="row articles">
+                <div 
+                    class="col-md-4 col-sm-6 col-12" 
+                    v-for="(article, index) in news"
+                    :key="index"
+                >
+                    <div class="card mb-4 box-shadow" :data-id="article.id">
+                        <img class="card-img-top" :alt="'Новость №' + article.id + ': ' + article.title" :src="article.image">
+                        <div class="card-body">
+                            <star-rating                         
+                                :rating="article.rating"
+                                :star-size="18"
+                                :increment="1"
+                                :animate="true"
+                                :max-rating="10"
+                                inactive-color="#808080"
+                                active-color="#FFC500"
+                                text-class="d-none"
+                                @current-rating="setRating"
+                                @rating-selected="editArticle(article)"
+                            >
+                            </star-rating>
 
-                        <h2 class="card-title">{{ article.title }}</h2>
-                        <p class="card-text">{{ article.description }}</p>
-                        <div class="d-flex justify-content-between align-items-center">
-                        <div class="btn-group">
-                            <button type="button" class="btn btn-sm btn-outline-info">Подробнее</button>
+                            <h2 class="card-title">{{ article.title }}</h2>
+                            <p class="card-text">{{ article.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-sm btn-outline-info">Подробнее</button>
+                            </div>
+                            <small class="text-muted">{{ article.date }}</small>
+                            </div>
                         </div>
-                        <small class="text-muted">{{ article.date }}</small>
-                        </div>
-                    </div>
                     </div>
                 </div>
 
@@ -45,7 +50,6 @@
 <script>
 
 import InfiniteLoading from 'vue-infinite-loading';
-import Vue from 'vue'
 
 export default {
     name: 'news',
@@ -59,6 +63,7 @@ export default {
             loading: false,
             spiner: true,
             article: null,
+            rating: null,
     };
     },
     methods: {
@@ -79,26 +84,45 @@ export default {
             
             this.getNews(this.page);
         },
+        setRating(rating){
+            this.rating = rating;
+        },
         async editArticle(article){
             this.article = article;
-            await axios
-                .post(`/api/setRating/${article.id}/${article.rating}`)
-                .then((response) => {
-                    console.log(response);
-                    if (response.status == 200){
+
+            if (this.rating != article.rating){
+                await axios
+                    .post(`/api/setRating/${article.id}/${this.rating}`)
+                    .then((response) => {
+                        if (response.status == 200){
+                            const newBlock = document.querySelector(`.articles [data-id="${article.id}"]`);
+                            if (newBlock){
+                                if (this.rating > article.rating){
+                                    newBlock.classList.add('border-success');
+                                    newBlock.classList.remove('border-danger');
+                                }
+                                if (this.rating < article.rating){
+                                    newBlock.classList.add('border-danger');
+                                    newBlock.classList.remove('border-success');
+                                }
+                            }
+                            this.article.rating = this.rating;
+                            this.article = null;
+                            this.rating = null;
+                            this.$notify({
+                                type: 'success',
+                                title: 'Рейтинг успешно изменен',
+                            });
+                        }
+                    })
+                    .catch(error => {
                         this.$notify({
-                            type: 'success',
-                            title: 'Рейтинг успешно изменен',
+                            type: 'error',
+                            title: 'Произошла ошибка',
+                            text: error
                         });
-                    }
-                })
-                .catch(error => {
-                    this.$notify({
-                        type: 'error',
-                        title: 'Произошла ошибка',
-                        text: error
-                    });
-                })
+                    })
+            }
         }
     },
     mounted() {
