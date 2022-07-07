@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\NewsIndexResource;
 use App\Models\News;
-use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    public function index()
+    public function index($offset, $limit)
     {
-        return NewsIndexResource::collection(
-            News::all()
-        );
+        return News::offset($offset)->take($limit)->get();
+    }
+
+    public function setRating($id, $rating)
+    {
+        $article = News::findOrFail($id);
+        $article->rating = $rating;
+        $article->save();
+
+        return $rating;
     }
 }

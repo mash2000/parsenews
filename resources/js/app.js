@@ -6,11 +6,13 @@ import Index from './Index';
 import router from './routes';
 import storeDefinition from './store';
 import VueObserveVisibility from 'vue-observe-visibility';
+import StarRating from 'vue-star-rating';
 
 window.Vue = require('vue').default;
 Vue.use(VueRouter);
 Vue.use(Vuex);
 Vue.use(VueObserveVisibility);
+Vue.component('star-rating', StarRating);
 
 const store = new Vuex.Store(storeDefinition);
 

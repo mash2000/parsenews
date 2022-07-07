@@ -20,3 +20,4 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('/news/{offset}/{limit}', [NewsController::class, 'index']);
+Route::post('/setRating/{id}/{rating}', [NewsController::class, 'setRating']);
