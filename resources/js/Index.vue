@@ -2,19 +2,9 @@
     <div>
       <nav class="navbar navbar-expand-md navbar-dark bg-dark">
           <router-link class="navbar-brand mr-auto" :to="{name: 'home'}">Parsenews</router-link>
-
-          <ul class="navbar-nav ms-auto">
-              
-          </ul>
-          <form class="form-inline mt-2 mt-md-0">
-            <input class="form-control mr-sm-2" type="text" placeholder="Поиск" aria-label="Search">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Поиск</button>
-          </form>
       </nav>
 
-      <div class="container my-4">
-          <router-view></router-view>
-      </div>
+        <router-view></router-view>
 
       <notifications position="top left"/>
   </div>
@@ -24,6 +14,11 @@
 import {mapState, mapGetters} from "vuex";
 export default {
     name: "Index",
+    data() {
+        return {
+            search: null,
+        };
+    },
     computed: {
         ... mapState({
             lastSearchComputed: state => state.lastSearch,

@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="container my-4">
         <div v-if="loading">
             ...Загрузка
         </div>
@@ -31,11 +31,10 @@
                             </star-rating>
 
                             <h2 class="card-title">{{ article.title }}</h2>
-                            <p class="card-text">{{ article.description }}</p>
                             <div class="row justify-content-between align-items-center">
                                 <div class="col-lg-6">
                                     <div class="btn-group">
-                                        <button type="button" class="btn btn-sm btn-outline-primary">Подробнее</button>
+                                        <router-link :class="'btn btn-sm btn-outline-info'" :to="{ name: 'single', params: { id: article.id } }">Подробнее</router-link>
                                         <button @click="showModal(article)" type="button" class="btn btn-sm btn-outline-danger" title="Удалить новость">
                                             <i class="fa fa-eraser" aria-hidden="true"></i>
                                         </button>
@@ -77,7 +76,7 @@ export default {
             spiner: true,
             article: null,
             rating: null,
-    };
+        };
     },
     methods: {
         async getNews(offset = 0, limit = 6){

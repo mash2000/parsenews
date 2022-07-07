@@ -11,6 +11,12 @@ class NewsController extends Controller
         return News::offset($offset)->take($limit)->get();
     }
 
+    public function single($id)
+    {
+        return News::findOrFail($id);
+    }
+
+
     public function setRating($id, $rating)
     {
         $article = News::findOrFail($id);
