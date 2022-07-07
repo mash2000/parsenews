@@ -15,6 +15,8 @@
       <div class="container my-4">
           <router-view></router-view>
       </div>
+
+      <notifications position="top left"/>
   </div>
 </template>
 

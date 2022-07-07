@@ -12,7 +12,7 @@
                         <star-rating                         
                             v-model="article.rating"
                             :star-size="18"
-                            :increment="0.5"
+                            :increment="1"
                             :animate="true"
                             :max-rating="10"
                             inactive-color="#808080"
@@ -39,13 +39,13 @@
                </div>
             </div> 
         </div>
-        
     </div>
 </template>
 
 <script>
 
 import InfiniteLoading from 'vue-infinite-loading';
+import Vue from 'vue'
 
 export default {
     name: 'news',
@@ -58,7 +58,6 @@ export default {
             page: 0,
             loading: false,
             spiner: true,
-            rating: null,
             article: null,
     };
     },
@@ -86,7 +85,20 @@ export default {
                 .post(`/api/setRating/${article.id}/${article.rating}`)
                 .then((response) => {
                     console.log(response);
-                });
+                    if (response.status == 200){
+                        this.$notify({
+                            type: 'success',
+                            title: 'Рейтинг успешно изменен',
+                        });
+                    }
+                })
+                .catch(error => {
+                    this.$notify({
+                        type: 'error',
+                        title: 'Произошла ошибка',
+                        text: error
+                    });
+                })
         }
     },
     mounted() {
